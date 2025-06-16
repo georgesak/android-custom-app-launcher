@@ -127,7 +127,7 @@ class MainActivity : ComponentActivity() {
         )
 
         val builder = androidx.core.app.NotificationCompat.Builder(this, "app_picker_channel")
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // Replace with your app's icon
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // Revert to a monochromatic icon
             .setContentTitle("App Launcher")
             .setContentText("Tap to open app picker")
             .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)
