@@ -39,20 +39,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val shouldShowAppPicker = intent.getBooleanExtra("show_app_picker", false)
-
-        val sharedPref = getPreferences(android.content.Context.MODE_PRIVATE)
-        val lastLaunchedAppPackage = sharedPref.getString("last_launched_app", null)
-
-        if (!shouldShowAppPicker && lastLaunchedAppPackage != null) {
-            val launchIntent = packageManager.getLaunchIntentForPackage(lastLaunchedAppPackage)
-            if (launchIntent != null) {
-                startActivity(launchIntent)
-                finish() // Close the launcher activity
-                return // Stop further execution
-            }
-        }
-
         // Request notification permission if necessary
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -71,6 +57,19 @@ class MainActivity : ComponentActivity() {
             showAppPickerNotification()
         }
 
+        val shouldShowAppPicker = intent.getBooleanExtra("show_app_picker", false)
+
+        val sharedPref = getPreferences(android.content.Context.MODE_PRIVATE)
+        val lastLaunchedAppPackage = sharedPref.getString("last_launched_app", null)
+
+        if (!shouldShowAppPicker && lastLaunchedAppPackage != null) {
+            val launchIntent = packageManager.getLaunchIntentForPackage(lastLaunchedAppPackage)
+            if (launchIntent != null) {
+                startActivity(launchIntent)
+                finish() // Close the launcher activity
+                return // Stop further execution
+            }
+        }
 
         setContent {
             CustomAppLauncherTheme {
