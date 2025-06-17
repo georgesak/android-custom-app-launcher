@@ -145,6 +145,7 @@ fun AppListScreen(onAppClick: (String) -> Unit) {
     val packageManager = context.packageManager
     val apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         .filter { app -> packageManager.getLaunchIntentForPackage(app.packageName) != null } // Filter out apps without a launch intent
+        .filter { app -> app.packageName != context.packageName } // Filter out the current app
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) { // Use Column to arrange button and list vertically
