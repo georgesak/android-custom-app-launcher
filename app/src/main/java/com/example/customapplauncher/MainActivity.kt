@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity() {
         if (!shouldShowAppPicker && lastLaunchedAppPackage != null) {
             val launchIntent = packageManager.getLaunchIntentForPackage(lastLaunchedAppPackage)
             if (launchIntent != null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 startActivity(launchIntent)
                 finish() // Close the launcher activity
                 return // Stop further execution
