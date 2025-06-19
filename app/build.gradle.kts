@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.customapplauncher"
+    namespace = "com.georgesak.customapplauncher"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.customapplauncher"
+        applicationId = "com.georgesak.customapplauncher"
         minSdk = 24
         targetSdk = 35
         versionCode = 3
