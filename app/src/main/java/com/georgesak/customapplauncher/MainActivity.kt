@@ -6,6 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.os.Build
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings // Import for Settings intent
@@ -151,14 +152,16 @@ class MainActivity : ComponentActivity() {
 fun AppListScreen(onAppClick: (String) -> Unit) {
     val context = LocalContext.current
     val packageManager = context.packageManager
+    val sharedPref = context.getSharedPreferences("app_launcher_prefs", Context.MODE_PRIVATE)
+    var selectedPackageName by remember { mutableStateOf(sharedPref.getString("last_launched_app", null)) }
+
     val apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         .filter { app ->
             app.packageName != context.packageName &&
             packageManager.getLaunchIntentForPackage(app.packageName) != null
         } // Filter out the current app and apps without a launcher activity
-
-    val sharedPref = context.getSharedPreferences("app_launcher_prefs", Context.MODE_PRIVATE)
-    var selectedPackageName by remember { mutableStateOf(sharedPref.getString("last_launched_app", null)) }
+        .sortedWith(compareBy<ApplicationInfo> { it.packageName != selectedPackageName }
+            .thenBy { packageManager.getApplicationLabel(it).toString() })
     var filterText by remember { mutableStateOf("") } // State for the filter text
 
     val filteredApps = apps.filter { app ->
