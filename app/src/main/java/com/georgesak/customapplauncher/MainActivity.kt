@@ -27,8 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.georgesak.customapplauncher.ui.theme.CustomAppLauncherTheme
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.asImageBitmap
@@ -40,9 +41,11 @@ import com.georgesak.customapplauncher.ui.theme.SelectedBlue // Import the new c
 import androidx.compose.ui.graphics.Color // Import Color
 import androidx.compose.material3.OutlinedTextField // Import OutlinedTextField
 import androidx.compose.material3.ExperimentalMaterial3Api // Import ExperimentalMaterial3Api
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+ 
+ class MainActivity : ComponentActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -147,10 +150,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class) // Add this annotation
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AppListScreen(onAppClick: (String) -> Unit) {
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val packageManager = context.packageManager
     val sharedPref = context.getSharedPreferences("app_launcher_prefs", Context.MODE_PRIVATE)
     var selectedPackageName by remember { mutableStateOf(sharedPref.getString("last_launched_app", null)) }
@@ -197,14 +201,24 @@ fun AppListScreen(onAppClick: (String) -> Unit) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                selectedPackageName = app.packageName // Update selected app
-                                with(sharedPref.edit()) {
-                                    putString("last_launched_app", app.packageName)
-                                    apply()
+                            .combinedClickable(
+                                onClick = {
+                                    selectedPackageName = app.packageName // Update selected app
+                                    with(sharedPref.edit()) {
+                                        putString("last_launched_app", app.packageName)
+                                        apply()
+                                    }
+                                    onAppClick(app.packageName)
+                                },
+                                onLongClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    val launchIntent =
+                                        packageManager.getLaunchIntentForPackage(app.packageName)
+                                    if (launchIntent != null) {
+                                        context.startActivity(launchIntent)
+                                    }
                                 }
-                                onAppClick(app.packageName)
-                            }
+                            )
                             .background(if (isSelected) SelectedBlue else Color.Transparent) // Apply background
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
